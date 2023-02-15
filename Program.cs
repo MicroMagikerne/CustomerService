@@ -33,3 +33,8 @@ app.MapControllers();
 // Kør webapplikationen
 app.Run();
 
+ builder.Host.ConfigureLogging(logging =>
+ {
+ logging.ClearProviders();
+ logging.AddConsole();
+ });

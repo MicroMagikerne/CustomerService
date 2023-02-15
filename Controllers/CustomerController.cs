@@ -53,28 +53,48 @@ new Customer() {
    [HttpGet("GetCustomerById")]
 public Customer Get(int customerId)
 {
+     _logger.LogInformation("Metode GetCustomerByID called at {DT}",
+        DateTime.UtcNow.ToLongTimeString());
+
     return _customers.Where(c => c.Id == customerId).First();
 }
 
 [HttpGet("GetAllCustomers")]
 public List<Customer> GetAll()
 {
+     _logger.LogInformation("Metode GetAllCustomers called at {DT}",
+    DateTime.UtcNow.ToLongTimeString());
+
     return _customers;
 }
-
 [HttpPost("AddCustomer")]
-public IActionResult AddCustomer([FromBody] Customer customer)
+public IActionResult AddCustomer(Customer customer)
 {
-    if (customer == null)
+    
+    // Log, at metoden er blevet kaldt
+    _logger.LogInformation("Metode AddCustomer called at {DT}", DateTime.UtcNow.ToLongTimeString());
+
+    // Tjek, om der allerede eksisterer en kunde i listen med samme ID som den kunde, der forsøges at blive tilføjet
+    if (_customers.Any(c => c.Id == customer.Id))
     {
-        return BadRequest();
+        // Log, at kunden er blevet tilføjet
+        _logger.LogInformation("Customer with ID {ID} added to the list of customers", customer.Id);
+
+        // Hvis en kunde med samme ID allerede eksisterer, returner en HTTP-statuskode 409 Conflict med en fejlbesked
+        return StatusCode(409, $"Customer with ID {customer.Id} already exists.");
     }
+    else
+    {
+        // Hvis kunden ikke eksisterer i listen, tilføj kunden til listen
+        _customers.Add(customer);
 
-    _customers.Add(customer);
-    return Ok();
+        // Log, at kunden er blevet tilføjet
+        _logger.LogInformation("Customer with ID {ID} added to the list of customers", customer.Id);
+
+        // Returner en HTTP-statuskode 200 OK for at indikere, at kunden er blevet tilføjet
+        return Ok();
+    }
 }
-
-
 }
 
 
